@@ -6,9 +6,7 @@ import io
 # from wand.image import Image as wi
 from flask import Flask, request, Response, send_file
 import logging
-import redis
 import jsonpickle
-import hashlib
 from minio import Minio
 from confluent_kafka import Producer, Consumer
 
@@ -64,7 +62,7 @@ except Exception as exp:
     print(f"Exception raised in worker loop: {str(exp)}")
 
 def get_details_from_kafka():
-    consumer.subscribe(['ocr_local_topic'])
+    consumer.subscribe(['ocr_topic'])
     file_detail_msg = consumer.poll(1.0)
     if file_detail_msg is None:
         return
