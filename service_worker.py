@@ -7,10 +7,12 @@ import logging
 import jsonpickle
 from minio import Minio
 from confluent_kafka import Producer, Consumer
+from pymongo import MongoClient
 
 
 # GLOBAL VARS
 path_to_tesseract = os.environ.get('TESSERACT_PATH', r'/usr/bin/tesseract')
+# path_to_tesseract = os.environ.get('TESSERACT_PATH', r'E:\tesseract\tesseract.exe')
 
 # Logger
 logger = logging.getLogger()
@@ -24,6 +26,14 @@ logger.addHandler(handler)
 
 # tesseract
 pytesseract.tesseract_cmd = path_to_tesseract
+
+# Mongo DB
+monogo_user = os.environ.get("MONGO_USERNAME", "handyscan_admin")
+mongo_pwd = os.environ.get("MONGO_PASSWORD", "handyscan_admin")
+mongo_connection_url = "mongodb+srv://" + monogo_user + ":" + mongo_pwd + "@glasscode.8iobb.mongodb.net/handyscan?retryWrites=true&w=majority"
+client = MongoClient(mongo_connection_url)
+db = client.handyscan
+print("Connected to Mongo")
 
 
 # kafka Config
@@ -105,6 +115,21 @@ def send_kafka_tts_message(tts_file_detail):
     producer.produce('tts_topic', value=jsonpickle.dumps(tts_file_detail), callback=kafka_produce_receipt)
     return
 
+def update_metadata(file_detail):
+    filter = {'user': file_detail['user_name'], 'collection': file_detail['collection']}
+    file_object = db.userRecord.find_one(filter)
+    update_file_object = file_object['files'][file_detail['file_name'].split(".")[0]]
+    update_file_object['status'] = "TTS"
+    update_file_object['textFile'] = {'bucket': file_detail['bucket'], 'fileName': file_detail['file_name']}
+    # file_object['files'][file_detail['file_name'].split(".")[0]] = update_file_object
+
+    logger.info("Updating Record Metadata")
+    logger.info(update_file_object)
+    return db.userRecord.find_one_and_update(
+        filter,
+        {'$set': {file_detail['file_name'].split(".")[0] : update_file_object}}    
+    )
+
 while True:
     try:
         file_detail = get_details_from_kafka()
@@ -126,5 +151,6 @@ while True:
                 tts_file_detail['bucket'] = 'tts-bucket'
                 logger.info("TTS Kafka Message: ", tts_file_detail)
                 send_kafka_tts_message(tts_file_detail)
+                update_metadata(tts_file_detail)
     except Exception as e:
         logger.error(e)
