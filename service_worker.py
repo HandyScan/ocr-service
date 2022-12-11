@@ -118,16 +118,18 @@ def send_kafka_tts_message(tts_file_detail):
 def update_metadata(file_detail):
     filter = {'user': file_detail['user_name'], 'collection': file_detail['collection']}
     file_object = db.userRecord.find_one(filter)
-    update_file_object = file_object['files'][file_detail['file_name'].split(".")[0]]
-    update_file_object['status'] = "TTS"
-    update_file_object['textFile'] = {'bucket': file_detail['bucket'], 'fileName': file_detail['file_name']}
-    # file_object['files'][file_detail['file_name'].split(".")[0]] = update_file_object
+    update_file_object = file_object['files']
+    update_file_object[file_detail['file_name'].split(".")[0]]['status'] = "TTS"
+    update_file_object[file_detail['file_name'].split(".")[0]]['textFile'] = {
+        'bucket': file_detail['bucket'], 
+        'fileName': file_detail['file_name']
+    }
 
     logger.info("Updating Record Metadata")
     logger.info(update_file_object)
     return db.userRecord.find_one_and_update(
         filter,
-        {'$set': {file_detail['file_name'].split(".")[0] : update_file_object}}    
+        {'$set': {'files' : update_file_object}}    
     )
 
 while True:
@@ -149,8 +151,10 @@ while True:
                 tts_file_detail = file_detail
                 tts_file_detail['file_name'] = tts_file_name
                 tts_file_detail['bucket'] = 'tts-bucket'
-                logger.info("TTS Kafka Message: ", tts_file_detail)
+                logger.info("TTS Kafka Message: ")
+                logger.info(tts_file_detail)
                 send_kafka_tts_message(tts_file_detail)
-                update_metadata(tts_file_detail)
+                updated_file_detail = update_metadata(tts_file_detail)
+                logger.info(updated_file_detail)
     except Exception as e:
         logger.error(e)
