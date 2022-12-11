@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ocr-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ocr-service
+  template:
+    metadata:
+      labels:
+        app: ocr-service
+    spec:
+      containers:
+        - name: ocr-service
+          image: mspawanranjit/ocr-service:latest
+          # resources:
+          #   limits:
+          #     memory: "1024Mi"
+          #     cpu: "1000m"
+          env:
+            - name: TESSERACT_PATH
+              value: /usr/bin/tesseract
