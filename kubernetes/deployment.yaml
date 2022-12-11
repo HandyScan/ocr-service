@@ -15,10 +15,10 @@ spec:
       containers:
         - name: ocr-service
           image: mspawanranjith/ocr-service:latest
-          # resources:
-          #   limits:
-          #     memory: "1024Mi"
-          #     cpu: "1000m"
+          resources:
+            limits:
+              memory: "1024Mi"
+              cpu: "1000m"
           env:
             - name: TESSERACT_PATH
               value: /usr/bin/tesseract
@@ -28,3 +28,5 @@ spec:
               value: rootuser
             - name: MINIO_PASSWD
               value: rootpass123
+            - name: MINIO_HOST
+              value: minio:9000
