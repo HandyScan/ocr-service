@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: ocr-service
-          image: mspawanranjit/ocr-service:latest
+          image: mspawanranjith/ocr-service:latest
           # resources:
           #   limits:
           #     memory: "1024Mi"
@@ -22,3 +22,5 @@ spec:
           env:
             - name: TESSERACT_PATH
               value: /usr/bin/tesseract
+            - name: KAFKA_SECRET_KEY
+              value: pqfV+6B+nDwtrxr0GckMlrqofW5fW/kLPvWL83w+oZoPvkzwOzl5f/rhJbdYJOTn

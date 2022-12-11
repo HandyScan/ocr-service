@@ -1,5 +1,5 @@
 VERSION=v1
-DOCKERUSER=gagankshetty
+DOCKERUSER=mspawanranjith
 PROJECT=ocr-service
 build:
 	docker build -f Dockerfile -t ${PROJECT} .

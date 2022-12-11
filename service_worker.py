@@ -3,8 +3,6 @@ from pytesseract import pytesseract
 import os
 import sys
 import io
-# from wand.image import Image as wi
-from flask import Flask, request, Response, send_file
 import logging
 import jsonpickle
 from minio import Minio
@@ -31,7 +29,7 @@ pytesseract.tesseract_cmd = path_to_tesseract
 # kafka Config
 kafka_bootstrap_server = os.environ.get('KAFKA_BOOTSTRAP', 'pkc-4r087.us-west2.gcp.confluent.cloud:9092')
 kafka_api_key = os.environ.get('KAFKA_API_KEY', '4BRDEW6OW6Z35KZK')
-kafka_secret_key = os.environ.get('KAFKA_SECRET_KEY', '')
+kafka_secret_key = os.environ.get('KAFKA_SECRET_KEY', 'pqfV+6B+nDwtrxr0GckMlrqofW5fW/kLPvWL83w+oZoPvkzwOzl5f/rhJbdYJOTn')
 kafka_config = {
     'bootstrap.servers':'pkc-4r087.us-west2.gcp.confluent.cloud:9092',
     'security.protocol':'SASL_SSL',
@@ -108,22 +106,25 @@ def send_kafka_tts_message(tts_file_detail):
     return
 
 while True:
-    file_detail = get_details_from_kafka()
-    file_path = None
-    text = ''
-    if file_detail:
-        file_path = get_file(file_detail)
-        if file_path.endswith('pdf'):
-        # img_file = pdf_to_image(file_path)
-        # get_text_from_tesseract(img_file)
-            continue
-        else:
-            text = get_text_from_tesseract(file_path)
-        if len(text) != 0:
-            tts_file_name = file_detail['file_name'].split(".")[0]+".txt"
-            write_text_file(text, tts_file_name)
-            tts_file_detail = file_detail
-            tts_file_detail['file_name'] = tts_file_name
-            tts_file_detail['bucket'] = 'tts-bucket'
-            logger.info("TTS Kafka Message: ", tts_file_detail)
-            send_kafka_tts_message(tts_file_detail)
+    try:
+        file_detail = get_details_from_kafka()
+        file_path = None
+        text = ''
+        if file_detail:
+            file_path = get_file(file_detail)
+            if file_path.endswith('pdf'):
+            # img_file = pdf_to_image(file_path)
+            # get_text_from_tesseract(img_file)
+                continue
+            else:
+                text = get_text_from_tesseract(file_path)
+            if len(text) != 0:
+                tts_file_name = file_detail['file_name'].split(".")[0]+".txt"
+                write_text_file(text, tts_file_name)
+                tts_file_detail = file_detail
+                tts_file_detail['file_name'] = tts_file_name
+                tts_file_detail['bucket'] = 'tts-bucket'
+                logger.info("TTS Kafka Message: ", tts_file_detail)
+                send_kafka_tts_message(tts_file_detail)
+    except Exception as e:
+        logger.error(e)
