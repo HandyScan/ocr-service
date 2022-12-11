@@ -24,3 +24,7 @@ spec:
               value: /usr/bin/tesseract
             - name: KAFKA_SECRET_KEY
               value: pqfV+6B+nDwtrxr0GckMlrqofW5fW/kLPvWL83w+oZoPvkzwOzl5f/rhJbdYJOTn
+            - name: MINIO_USER
+              value: rootuser
+            - name: MINIO_PASSWD
+              value: rootpass123
