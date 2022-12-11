@@ -10,11 +10,9 @@ import jsonpickle
 from minio import Minio
 from confluent_kafka import Producer, Consumer
 
-# intialize the application
-app = Flask(__name__)
 
 # GLOBAL VARS
-path_to_tesseract = os.environ.get('TESSERACT_PATH', r'E:\tesseract\tesseract.exe')
+path_to_tesseract = os.environ.get('TESSERACT_PATH', r'/usr/bin/tesseract')
 
 # Logger
 logger = logging.getLogger()
