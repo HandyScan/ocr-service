@@ -15,3 +15,6 @@ deploy:
 
 cleanup:
 	kubectl delete -f ./kubernetes
+
+logs:
+	kubectl logs -l app=ocr-service -f
